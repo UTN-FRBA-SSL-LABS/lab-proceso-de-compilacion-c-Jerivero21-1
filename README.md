@@ -1,4 +1,3 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/iVzT1xMN)
 # Laboratorio: El Proceso de Compilación en C
 
 **Materia:** Sintaxis y Semántica de los Lenguajes (UTN-FRBA)
@@ -57,17 +56,7 @@ nm programa   > salidas/nm_ejecutable.txt        # guarda la tabla de símbolos 
 
 Abrí el archivo con cualquier editor y respondé cada pregunta en el lugar indicado, con la salida real de los comandos que ejecutaste.
 
-#### Paso 4: Verificar localmente y hacer push
-
-Antes de pushear, verificá tu puntaje local con:
-
-```bash
-make test
-```
-
-> **Tip:** el workflow de corrección solo se activa cuando pusheás cambios en archivos `.i`, `.s`, `.c`, `salidas/` o `proceso_compilacion.md`. Para todo lo demás, `make test` te da el mismo resultado sin consumir minutos de GitHub Actions.
-
-#### Paso 4b: Commitear y hacer push
+#### Paso 4: Commitear y hacer push
 
 Verificar qué archivos están listos para commitear:
 
@@ -203,7 +192,7 @@ Ejecutar estos tres comandos. Si todos muestran un número de versión, el entor
 ```bash
 gcc --version
 clang --version
-nm --version        # en macOS puede decir "Apple LLVM" — está bien
+nm --version      
 ```
 
 ---
@@ -346,11 +335,11 @@ Todos son correctos. Lo importante no es el número exacto sino que sea **varios
 **P1.** Ejecutá `wc -l programa.i` y escribí el número de líneas que obtenés.
 
 <!-- Completá la línea siguiente con el número exacto (solo dígitos, sin espacios): -->
-LINEAS_I=
+LINEAS_I= 821
 
 ¿Por qué ese número es tan mayor que las 94 líneas de `programa.c`?
 
-> **R:**
+> **R:El número es mucho más grande que las 94 líneas de programa.c porque programa.i es el archivo después del preprocesamiento. Ahí el compilador ya metió todo lo que venía en los #include, o sea, el contenido de las librerías, además de reemplazar los #define y sacar los comentarios. Entonces el archivo termina teniendo mucho más código del que escribiste originalmente, por eso la cantidad de líneas crece tanto.**
 
 ---
 
@@ -389,11 +378,11 @@ grep "Archivo fuente principal" programa.i   # no debe encontrar nada
 ¿El comando encuentra algo o no devuelve nada?
 
 <!-- Completá con SI (si encontró algo) o NO (si no encontró nada): -->
-COMENTARIOS_EN_I=
+COMENTARIOS_EN_I= NO
 
 ¿Por qué ocurre eso?
 
-> **R:**
+> **R:No encuentra nada porque en la etapa de preprocesamiento se eliminan todos los comentarios del código. Como esa frase estaba dentro de un comentario en programa.c, directamente no pasa al archivo programa.i, por eso grep no devuelve ningún resultado.**
 
 ---
 
@@ -422,24 +411,25 @@ Nótese que `CUADRADO(5)` se expande a `((5) * (5))`, con los paréntesis extra 
 
 **P3.** Ejecutá `grep -n "CUADRADO" programa.i` y copiá la salida completa.
 
-> **R:**
+> **R:790:    printf("CUADRADO(%d)      = %d\n", 5, ((5) * (5)));
+**
 
 ¿El nombre `CUADRADO` aparece tal cual en `programa.i`, o fue reemplazado
 por otra cosa? Respondé SI o NO:
 
 <!-- Completá con SI o NO: -->
-CUADRADO_EN_I=
+CUADRADO_EN_I= SI
 
 ---
 
 **P4.** Ejecutá `grep -n '"1\.0"' programa.i` y copiá la línea encontrada.
 
-> **R:**
+> **R:781:    printf("=== Laboratorio de Compilacion en C (v%s) ===\n\n", "1.0");**
 
 ¿Cuál era el nombre de la macro en `programa.c` que fue reemplazada por `"1.0"`?
 
 <!-- Completá con el nombre exacto de la macro (en mayúsculas, como está en el fuente): -->
-NOMBRE_MACRO_VERSION=
+NOMBRE_MACRO_VERSION= VERSION
 
 ---
 
@@ -475,13 +465,14 @@ gcc -E programa.c | grep "Iniciando"
 gcc -E -DDEBUG programa.c | grep "Iniciando"
 ```
 
-> **R:**
+> **R: **VACIO** | printf("[DEBUG] %s\n", ("Iniciando main"));
+**
 
 ¿Agregar `-DDEBUG` hace que aparezca código nuevo en el `.i` que antes no estaba?
-Respondé SI o NO:
+Respondé SI o NO: 
 
 <!-- Completá con SI o NO: -->
-DEBUG_ACTIVA_CODIGO=
+DEBUG_ACTIVA_CODIGO= SI
 
 ---
 
@@ -504,7 +495,7 @@ grep -n "stdio.h" programa.i | head -5
 
 ¿Qué información comunican esas líneas `# N "archivo"`? ¿De qué archivo proviene el bloque que contiene la declaración de `printf`?
 
-> **R:**
+> **R:# Las lineas N "archivo" son directivas que agrega el preprocesador para indicar de qué archivo original proviene el código que sigue y en qué línea estaba. Sirven para que el compilador sepan referenciar correctamente el origen del código después de haber expandido los #include.**
 
 ---
 
@@ -660,26 +651,33 @@ Aparecen como instrucciones de llamada (por ejemplo `bl _area_circulo`), pero **
 
 **P7.** Ejecutá `grep "area_circulo" programa.s` y copiá la salida.
 
-> **R:**
+> **R:        .ascii "area_circulo(%.1f) = %.4f\12\0"
+        call    _area_circulo
+        .def    _area_circulo;  .scl    2;      .type   32;     .endef
+**
 
 ¿`area_circulo` aparece como una función *definida* en `programa.s`
 (con su propio bloque de instrucciones) o solo como una *llamada* (instrucción sin cuerpo)?
 Respondé DEFINIDA o LLAMADA:
 
 <!-- Completá con DEFINIDA o LLAMADA: -->
-AREA_EN_S=
+AREA_EN_S=LLAMADA
 
 ---
 
 **P8.** Encontrá en `programa.s` la etiqueta `sumar:` o `_sumar:` y copiá
 las primeras 4 líneas de instrucciones que le siguen.
 
-> **R:**
+> **R:_sumar:
+LFB14:
+	.cfi_startproc
+	pushl	%ebp
+	.cfi_def_cfa_offset 8**
 
 Explicá en términos generales qué hacen esas instrucciones
 (usá los comentarios del laboratorio como guía):
 
-> **R:**
+> **R:Esas instrucciones son el comienzo de la función. Preparan la pila para poder ejecutarla: guardan información del estado anterior y dejan todo listo para trabajar dentro de sumar sin romper lo que había antes.**
 
 ---
 
@@ -692,13 +690,18 @@ grep "llamadas" programa.s
 
 **P9.** Ejecutá `grep "llamadas" programa.s` y copiá la salida.
 
-> **R:**
+> **R:        .globl  _llamadas
+_llamadas:
+        movl    _llamadas, %eax
+        movl    %eax, _llamadas
+        movl    _llamadas, %eax
+**
 
 ¿Aparece la variable `llamadas` en el ensamblador?
 Respondé SI o NO:
 
 <!-- Completá con SI o NO: -->
-LLAMADAS_EN_S=
+LLAMADAS_EN_S= SI
 
 ---
 
@@ -802,13 +805,28 @@ Salida esperada (simplificada):
 
 **P10.** Ejecutá `nm programa.o` y copiá la salida completa.
 
-> **R:**
+> **R:
+00000000 b .bss
+00000000 d .data
+00000000 r .eh_frame
+00000000 r .rdata
+00000000 r .rdata$zzz
+00000000 t .text
+         U ___main
+         U _area_circulo
+         U _factorial
+00000132 T _imprimir_separador
+00000000 B _llamadas
+0000001a T _main
+         U _printf
+         U _puts
+00000000 T _sumar
+**
 
 ¿Con qué letra aparece `area_circulo` en esa tabla?
 Escribí solo la letra (una mayúscula):
-
 <!-- Completá con la letra exacta que muestra nm (U, T, D, etc.): -->
-TIPO_AREA_EN_O=
+TIPO_AREA_EN_O=U
 
 ---
 
@@ -828,13 +846,13 @@ nm matematica.o
 **P11.** ¿Por qué `area_circulo` tiene ese tipo en `programa.o`
 pero tipo `T` en `matematica.o`?
 
-> **R:**
+> **R:Porque en programa.o la función area_circulo no está implementada, solo se usa, entonces aparece como U (undefined). En cambio, en matematica.o sí está definida la función, por eso aparece como T, es decir, código de la función.**
 
 ¿Qué etapa del proceso de compilación resuelve esa diferencia?
 Respondé con una palabra: PREPROCESAMIENTO, COMPILACION, ENSAMBLADO o ENLAZADO:
 
 <!-- Completá con una de las cuatro opciones: -->
-ETAPA_QUE_RESUELVE=
+ETAPA_QUE_RESUELVE= ENLAZADO
 
 ---
 
@@ -853,13 +871,14 @@ Un `.o` no es ejecutable por dos razones:
 
 **P12.** Intentá ejecutar `./programa.o` directamente. ¿Qué mensaje aparece?
 
-> **R:**
+> **R:bash: ./programa.o: cannot execute binary file: Exec format error
+**
 
 ¿Se puede ejecutar un archivo `.o` directamente?
 Respondé SI o NO:
 
 <!-- Completá con SI o NO: -->
-EJECUTABLE_O=
+EJECUTABLE_O=NO
 
 ---
 
@@ -925,7 +944,7 @@ gcc programa.o matematica.o -o programa
 #### Verificar que los símbolos se resolvieron
 
 ```bash
-nm programa | grep -E "sumar|factorial|area|main|llamadas|imprimir"
+nm programa nm| grep -E "sumar|factorial|area|main|llamadas|imprimir"
 ```
 
 Todos los símbolos que antes eran `U` (indefinidos) ahora tienen direcciones concretas:
@@ -948,13 +967,13 @@ nm programa | grep area_circulo
 **P13.** Enlazá con `gcc programa.o matematica.o -o programa`.
 Ejecutá `nm programa | grep "area_circulo"` y copiá la salida.
 
-> **R:**
+> **R:004015a8 T _area_circulo**
 
 ¿Con qué letra aparece ahora `area_circulo` en el ejecutable final?
 Escribí solo la letra:
 
 <!-- Completá con la letra exacta que muestra nm: -->
-TIPO_AREA_ENLAZADO=
+TIPO_AREA_ENLAZADO= T
 
 ---
 
@@ -970,17 +989,20 @@ Quedan algunos `U` incluso en el ejecutable final. ¿Por qué? Son funciones de 
 
 **P14.** Ejecutá `nm programa | grep "^ *U"` y copiá la salida.
 
-> **R:**
+> **R:   U ___deregister_frame_info
+         U ___register_frame_info
+         U __Jv_RegisterClasses
+**
 
 ¿Quedan símbolos de tipo `U` en el ejecutable final?
 Respondé SI o NO:
 
 <!-- Completá con SI o NO: -->
-SIMBOLOS_U_FINAL=
+SIMBOLOS_U_FINAL= SI
 
 ¿Por qué quedan? ¿Quién los resuelve y cuándo?
 
-> **R:**
+> **R: Se quedan porque son funciones de librerías del sistema. No se resuelven al compilar, sino cuando ejecutás el programa, ahí el sistema las completa automáticamente.**
 
 ---
 
@@ -999,7 +1021,7 @@ SIMBOLOS_U_FINAL=
 ¿Qué valor da `factorial(5)`? Escribí solo el número:
 
 <!-- Completá con el número exacto: -->
-FACTORIAL_5=
+FACTORIAL_5= 120
 
 ---
 
@@ -1011,14 +1033,14 @@ FACTORIAL_5=
 como `CUADRADO(x)` y una **función real** como `sumar(a, b)`.
 ¿En qué etapa "desaparece" cada una? ¿Cuál tiene verificación de tipos?
 
-> **R:**
+> **R: Una macro como CUADRADO(x) no es una función real: es solo un reemplazo de texto que hace el preprocesador antes de compilar. En cambio, sumar(a, b) sí es una función de verdad, con su código, parámetros y llamada en tiempo de ejecución. La macro “desaparece” en el preprocesamiento porque se expande ahí mismo, mientras que la función real existe hasta el programa final. Además, la macro no tiene verificación de tipos, pero la función sí tiene chequeo de tipos en la compilación.**
 
 ---
 
 **P17.** ¿Qué diferencia hay entre un símbolo de tipo `T` y uno de tipo `D`
 en la salida de `nm`? ¿En qué sección del archivo objeto vive cada uno?
 
-> **R:**
+> **R: Un símbolo T es código de una función, o sea, algo que está en la sección .text. Un símbolo D es una variable global inicializada, que vive en la sección .data. Básicamente, T = código ejecutable, D = datos ya inicializados.**
 
 ---
 
